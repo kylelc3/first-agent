@@ -1,0 +1,27 @@
+import os
+import asyncio
+from dotenv import load_dotenv
+from autogen_agentchat.agents import AssistantAgent
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+
+model_client = OpenAIChatCompletionClient(
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    model="gemini-2.5-flash",
+    api_key=api_key
+)
+
+assistant = AssistantAgent(
+    name="assistant",
+    model_client=model_client,
+    description="first agent"
+)
+
+async def my_async_function():
+    result = await assistant.run(task="What is the capital of France?")
+    print(result.messages[-1].content)
+
+asyncio.run(my_async_function())
+
