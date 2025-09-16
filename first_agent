@@ -23,7 +23,9 @@ model_client = OpenAIChatCompletionClient(
 mushroom_expert = AssistantAgent(
     name="MushroomExpertAgent",
     model_client=model_client,
-    system_message="""
+    system_message=
+    
+    """
     You are a professional mycologist. Given a mushroom photo and any provided 
     description, suggest likely species or genera. Respond with multiple possibilities if 
     uncertain. NEVER say something is edible unless you're absolutely certain. Then, explain:
@@ -35,6 +37,7 @@ mushroom_expert = AssistantAgent(
 
     Err on the side of caution. If uncertain, say so clearly.
     """
+    
 )
 
 
