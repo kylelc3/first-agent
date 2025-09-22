@@ -1,0 +1,81 @@
+import os
+import asyncio
+from dotenv import load_dotenv
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_agentchat.messages import MultiModalMessage
+from autogen_agentchat.conditions import TextMentionTermination
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+from pillow_heif import register_heif_opener
+from autogen_core import Image as AGImage
+from PIL import Image
+
+
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+
+
+model_client = OpenAIChatCompletionClient(
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    model="gemini-2.5-flash",
+    api_key=api_key
+)
+
+
+mushroom_expert_one = AssistantAgent(
+    name="MushroomExpertAgentOne",
+    model_client=model_client,
+    system_message=
+    
+    """
+    You are a professional mycologist. Given a mushroom photo and any provided 
+    description, suggest likely species or genera. Respond with multiple possibilities if 
+    uncertain. NEVER say something is edible unless you're absolutely certain. Then, explain:
+
+    - Edibility or toxicity
+    - Known lookalikes
+    - Foraging warnings
+    - Identification tips
+
+    Err on the side of caution. If uncertain, say so clearly.
+    """
+
+)
+
+
+mushroom_expert_two = AssistantAgent(
+    name="MushroomExpertAgentTwo",
+    model_client=model_client,
+    system_message=
+    
+    """
+    Provide constructive feedback. Respond with 'APPROVE' to when your feedbacks are addressed.
+    """
+
+)
+
+
+text_termination = TextMentionTermination("APPROVE")
+
+
+team = RoundRobinGroupChat([mushroom_expert_one, mushroom_expert_two], termination_condition=text_termination)
+
+
+async def mushroom_identifier():
+
+    register_heif_opener()
+
+    image_path = input("Path to image: ")
+    pil_image = Image.open(image_path)
+    ag_image = AGImage(pil_image)
+
+    identifier = MultiModalMessage(
+        content=["Identify the mushroom in the image.", ag_image],
+        source="user"
+    )
+
+    result = await team.run(task=identifier)
+    print(result.messages[-2].content)
+
+
+asyncio.run(mushroom_identifier())
