@@ -1,6 +1,7 @@
 import os
 import asyncio
 from dotenv import load_dotenv
+from autogen_agentchat.ui import Console
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.messages import MultiModalMessage
@@ -74,8 +75,8 @@ async def mushroom_identifier():
         source="user"
     )
 
-    result = await team.run(task=identifier)
-    print(result.messages[-2].content)
+    stream = team.run_stream(task=identifier)
+    await Console(stream)
 
 
 asyncio.run(mushroom_identifier())

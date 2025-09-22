@@ -1,8 +1,8 @@
 autogen-agentchat
 autogen-core
 autogen-ext
+pillow-heif
+tiktoken
 asyncio
 dotenv
 openai
-tiktoken
-pillow-heif
